@@ -3,6 +3,13 @@ set -euo pipefail
 trap 'echo "[install_niri] 错误：命令失败 → $BASH_COMMAND" >&2' ERR
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# 获取实际用户的 home 目录（sudo 运行时 $HOME 可能指向 /root）
+if [[ $EUID -eq 0 && -n "${SUDO_USER-}" && "$SUDO_USER" != "root" ]]; then
+  USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+else
+  USER_HOME="$HOME"
+fi
+
 # 一键安装并配置 niri 相关环境
 # 该脚本支持交互式菜单，安装 pacman 和 yay 所需软件包，并复制以下配置文件：
 #   ~/.config/mako/config
@@ -133,7 +140,7 @@ enable_ly_service() {
 
 write_waybar_config() {
   local src="$SCRIPT_DIR/waybar"
-  local dst="$HOME/.config/waybar"
+  local dst="$USER_HOME/.config/waybar"
   log "复制 waybar 配置: $src → $dst"
   mkdir -p "$dst"
   cp -r "$src"/* "$dst"/
@@ -152,7 +159,7 @@ write_all_configs() {
 
 write_rime_custom_yaml() {
   local src="$SCRIPT_DIR/fcitx5/rime"
-  local dst="$HOME/.local/share/fcitx5/rime"
+  local dst="$USER_HOME/.local/share/fcitx5/rime"
   log "复制 fcitx5 rime 配置: $src → $dst"
   mkdir -p "$dst"
   cp -r "$src"/* "$dst"/
@@ -282,7 +289,7 @@ append_if_missing() {
 
 write_mako_config() {
   local src="$SCRIPT_DIR/mako/config"
-  local dst="$HOME/.config/mako/config"
+  local dst="$USER_HOME/.config/mako/config"
   log "复制 mako 配置: $src → $dst"
   mkdir -p "$(dirname "$dst")"
   cp "$src" "$dst"
@@ -290,7 +297,7 @@ write_mako_config() {
 
 write_xdg_portal_config() {
   local src="$SCRIPT_DIR/xdg-desktop-portal/niri-portals.conf"
-  local dst="$HOME/.config/xdg-desktop-portal/niri-portals.conf"
+  local dst="$USER_HOME/.config/xdg-desktop-portal/niri-portals.conf"
   log "复制 xdg-desktop-portal 配置: $src → $dst"
   mkdir -p "$(dirname "$dst")"
   cp "$src" "$dst"
@@ -298,7 +305,7 @@ write_xdg_portal_config() {
 
 write_swaylock_config() {
   local src="$SCRIPT_DIR/swaylock/config"
-  local dst="$HOME/.config/swaylock/config"
+  local dst="$USER_HOME/.config/swaylock/config"
   log "复制 swaylock 配置: $src → $dst"
   mkdir -p "$(dirname "$dst")"
   cp "$src" "$dst"
@@ -306,7 +313,7 @@ write_swaylock_config() {
 
 write_swayidle_script() {
   local src="$SCRIPT_DIR/niri/scripts/swayidle.sh"
-  local dst="$HOME/.config/niri/scripts/swayidle.sh"
+  local dst="$USER_HOME/.config/niri/scripts/swayidle.sh"
   log "复制 swayidle 脚本: $src → $dst"
   mkdir -p "$(dirname "$dst")"
   cp "$src" "$dst"
@@ -315,7 +322,7 @@ write_swayidle_script() {
 
 write_satty_config() {
   local src="$SCRIPT_DIR/satty/config.toml"
-  local dst="$HOME/.config/satty/config.toml"
+  local dst="$USER_HOME/.config/satty/config.toml"
   log "复制 satty 配置: $src → $dst"
   mkdir -p "$(dirname "$dst")"
   cp "$src" "$dst"
@@ -323,7 +330,7 @@ write_satty_config() {
 
 write_niri_config() {
   local src="$SCRIPT_DIR/niri/config.kdl"
-  local dst="$HOME/.config/niri/config.kdl"
+  local dst="$USER_HOME/.config/niri/config.kdl"
   local backup="${dst}.backup.$(date +%Y%m%d%H%M%S)"
   mkdir -p "$(dirname "$dst")"
   if [[ -f "$dst" ]]; then
