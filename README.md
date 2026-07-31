@@ -40,6 +40,12 @@ chmod +x install_niri.sh
 
 # 以普通用户身份运行（不要 sudo）
 ./install_niri.sh
+
+# 非交互执行（自动选择“全部执行”）
+./install_niri.sh --yes
+
+# 非交互执行指定菜单项（例如 3: 写入配置）
+./install_niri.sh --action 3
 ```
 
 ## 菜单说明
